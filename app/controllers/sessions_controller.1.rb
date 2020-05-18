@@ -40,49 +40,35 @@ class SessionsController < ApplicationController
           puts '6'
           auth=Authorization.find_with_omniauth(auth_hash)
           message="Welcome back #{auth.user.name}!"+ "You have logged in via #{auth.provider}"
-          session[:user_id] = auth.user.id
-          self.current_user = auth.user
-          redirect_to user_posts_path(self.current_user) and return
-          
-          #redirect_to dashboard_index_path #and return 
+          #redirect_to dashboard_signup_path #and return
         else
           puts "user exists"
           if User.exists?(auth_hash['info'])
             
             user=User.find_with_omniauth(auth_hash['info'])
             auth=user.add_provider(auth_hash)
-            message="You can now login using #{auth_hash["provider"].capitalize}"
-            session[:user_id] = auth.user.id
-            self.current_user = auth.user
-            redirect_to user_posts_path(user) and return
+            message="You can now login using #{auth_hash["provider"].captilize}"
           else #User is registering with given provider
             puts 'Should go here'
             p auth_hash['info']
-            #auth_hash["info"]["email"] check if BU email and then go to failure if not BU
+            
             user = User.create_with_omniauth(auth_hash['info'])#! :name => auth_hash["info"]["name"], :email => auth_hash["info"]["email"] 
-            puts "user"
-            p user
             auth=user.authorizations.create_with_omniauth(auth_hash)
             message = "Welcome #{user.name}! You have signed up via #{auth.provider}"
-            #create current_user and session
-            session[:user_id] = auth.user.id
-            self.current_user = auth.user
-            @user = auth.user
-            redirect_to edit_user_path(@user) and return
-            
+            #redirect_to welcome_signup_path
           end
         end
-       #puts '3'
+       puts '3'
        #create current_user and session
-       #session[:user_id] = auth.user.id
-       #self.current_user = auth.user
-       #flash[:notice] = "#{message}"
-       #redirect_to dashboard_index_path and return 
+       session[:user_id] = auth.user.id
+       self.current_user = auth.user
+       flash[:notice] = "#{message}"
+       redirect_to dashboard_index_path and return 
        #redirect_to dashboard_signup_path and return
       end
     rescue DoubleLoginError,NotCurrentUserError, Exception => exception
          flash[:error]="#{exception.class}: #{exception.message}"
-         redirect_to auth_failure_path and return
+         redirect_to dashboard_index_path and return
     end
   end
 
@@ -115,12 +101,17 @@ class SessionsController < ApplicationController
     user = User.find(session[:user_id])
     user.name ==info['name'] && user.email == info['email']
   end
+  
+  
+  
   def cleanup
     reset_session
     flash[:warning]= "session reset"
     redirect_to welcome_login_path
+    
   end
-
-  #def signup
-  #end
+  
+  def signup
+    
+  end
 end
