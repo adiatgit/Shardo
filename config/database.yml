@@ -5,15 +5,12 @@
 #   gem 'sqlite3'
 #
 default: &default
-  adapter: sqlite3
-  encoding: unicode
-  database: store_development
+  adapter: postgresql
   pool: 5
   timeout: 5000
 
 development:
-  #<<: *default
-  encoding: unicode
+  <<: *default
   database: store_development
   
 
@@ -21,14 +18,9 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  #<<: *default
-  #database: db/test.sqlite3
-  adapter: postgresql
-  encoding: unicode
+  <<: *default
   database: store_test
   
 production:
-  #<<: *default
-  #database: db/production.sqlite3
-  adapter: postgresql
-  encoding: unicode
+  <<: *default
+  database: store_production
